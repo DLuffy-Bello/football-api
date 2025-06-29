@@ -47,4 +47,43 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the API data for the user.
+     *
+     * @return array<string, mixed>
+     */
+    public function getApiData()
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'email' => $this->email,
+            'email_verified_at' => $this->email_verified_at,
+            'roles' => $this->getRolesArray(),
+            'permissions' => $this->getPermissionsArray(),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
+    }
+
+    /**
+     * Get all permissions of the user.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getPermissionsArray()
+    {
+        return $this->getAllPermissions()->pluck('name')->toArray();
+    }
+
+    /**
+     * Get the roles of the user as an array.
+     *
+     * @return list<string>
+     */
+    public function getRolesArray()
+    {
+        return $this->getRoleNames()->toArray();
+    }
 }
