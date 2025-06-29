@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Services\FootballDataService;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 class CompetitionController extends Controller
 {
@@ -23,5 +24,10 @@ class CompetitionController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to fetch competitions', 'messages' => 'Error message'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public function getCompetition($id)
+    {
+        return response()->json(['error' => 'Failed to fetch competition', 'messages' => 'Error message'], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 }
