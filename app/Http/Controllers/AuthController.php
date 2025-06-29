@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Passport\Token;
 
 class AuthController extends Controller
 {
@@ -68,10 +70,25 @@ class AuthController extends Controller
         }
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        return response()->json([
-            'message' => 'Logout successful'
-        ], Response::HTTP_OK);
+         try {
+            $user = $request->user();
+            $tokenId = $user->token()->id;
+
+            // Buscar y revocar el token
+            $token = Token::find($tokenId);
+            if ($token) {
+                $token->revoke();
+            }
+            return response()->json([
+                'message' => 'Successfully logged out'
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error during logout',
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
