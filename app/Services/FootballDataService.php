@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Interfaces\IFootballDataService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class FootballDataService implements IFootballDataService
 {
@@ -54,11 +55,10 @@ class FootballDataService implements IFootballDataService
                 'X-Auth-Token' => $this->apiKey,
                 'Accept' => 'application/json',
             ])->get($this->apiUrl . $endpoint);
-
             if ($response->successful()) {
                 return $response->json();
             }
-            return null;
+            return [];
         } catch (\Exception $e) {
             throw new \Exception('Error making API request: ' . $e->getMessage());
         }
@@ -67,12 +67,12 @@ class FootballDataService implements IFootballDataService
     /**
      * Get football competitions from the API.
      *
-     * @return array|null
+     * @return array
      */
     public function getCompetitions(): array
     {
         $cacheKey = 'football_competitions';
-        return Cache::remember('competitions', 60, function () use ($cacheKey) {
+        return Cache::remember($cacheKey, 60, function () use ($cacheKey) {
             try {
                 $data = $this->makeRequest('/competitions');
                 return $data['competitions'] ?? [];
@@ -90,7 +90,7 @@ class FootballDataService implements IFootballDataService
      * Get details of a specific football competition.
      *
      * @param int $competitionId
-     * @return array|null
+     * @return array
      */
     public function getCompetitionDetails(int $competitionId): array
     {
@@ -98,18 +98,19 @@ class FootballDataService implements IFootballDataService
 
         return Cache::remember($cacheKey, 60 * 60 * 12, function () use ($competitionId, $cacheKey) {
             try {
-                $data = $this->makeRequest("/competitions/{$competitionId}/teams");
-
+                Log::info("Fetching competition details for ID: {$competitionId}");
+                $data = $this->makeRequest("/competitions/{$competitionId}");
                 if ($data) {
                     Cache::put("{$cacheKey}_fallback", $data, 60 * 60 * 24 * 7);
                 }
 
-                return $data;
+                return $data ?? [];
             } catch (\Exception $e) {
                 $fallbackData = Cache::get("{$cacheKey}_fallback");
                 if ($fallbackData) {
                     return $fallbackData;
                 }
+                dd($e->getMessage());
                 return [];
             }
         });
@@ -151,6 +152,58 @@ class FootballDataService implements IFootballDataService
         return Cache::remember($cacheKey, 60 * 60 * 12, function () use ($teamId, $cacheKey) {
             try {
                 $data = $this->makeRequest("/teams/{$teamId}");
+
+                if ($data) {
+                    Cache::put("{$cacheKey}_fallback", $data, 60 * 60 * 24 * 7);
+                }
+
+                return $data ?? [];
+            } catch (\Exception $e) {
+                $fallbackData = Cache::get("{$cacheKey}_fallback");
+                if ($fallbackData) {
+                    return $fallbackData;
+                }
+                return [];
+            }
+        });
+    }
+
+    /**
+     * Get a list of players from the API.
+     *
+     * @return array
+     */
+    public function getPlayers(): array
+    {
+        $cacheKey = 'football_players';
+
+        return Cache::remember($cacheKey, 60, function () use ($cacheKey) {
+            try {
+                $data = $this->makeRequest('/players');
+                return $data['players'] ?? [];
+            } catch (\Exception $e) {
+                $fallbackData = Cache::get("{$cacheKey}_fallback", []);
+                if (!empty($fallbackData)) {
+                    return $fallbackData;
+                }
+                return [];
+            }
+        });
+    }
+
+    /**
+     * Get details of a specific football player.
+     *
+     * @param int $playerId
+     * @return array
+     */
+    public function getPlayerDetails(int $playerId): array
+    {
+        $cacheKey = "football_player_{$playerId}";
+
+        return Cache::remember($cacheKey, 60 * 60 * 12, function () use ($playerId, $cacheKey) {
+            try {
+                $data = $this->makeRequest("/players/{$playerId}");
 
                 if ($data) {
                     Cache::put("{$cacheKey}_fallback", $data, 60 * 60 * 24 * 7);

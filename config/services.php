@@ -36,8 +36,8 @@ return [
     ],
 
     'football_data' => [
-        'api_key' => env('FOOTBALL_DATA_API_KEY'),
-        'api_url' => env('FOOTBALL_DATA_API_URL', 'https://api.football-data.org/v4'),
+        'api_key' => env('FOOTBALL_API_KEY'),
+        'api_url' => env('FOOTBALL_API_URL', 'https://api.football-data.org/v4'),
         'rate_limit' => env('FOOTBALL_DATA_RATE_LIMIT', 10),
         'timeout' => env('FOOTBALL_DATA_TIMEOUT', 30),
     ],
