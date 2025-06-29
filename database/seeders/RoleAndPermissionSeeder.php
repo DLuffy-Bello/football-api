@@ -26,22 +26,18 @@ class RoleAndPermissionSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::create(['name' => $permission, 'guard_name' => 'api']);
         }
 
-        $admin = Role::create(['name' => 'admin']);
-        $viewer = Role::create(['name' => 'viewer']);
+        $adminApi = Role::create(['name' => 'admin', 'guard_name' => 'api']);
+        $viewerApi = Role::create(['name' => 'viewer', 'guard_name' => 'api']);
 
-        $allPermissions = Permission::all();
-        $admin->syncPermissions($allPermissions);
+        $allApiPermissions = Permission::where('guard_name', 'api')->get();
+        $adminApi->syncPermissions($allApiPermissions);
 
-        $viewerPermissions = [
-            'view_competitions',
-            'view_teams',
-            'view_players',
-        ];
-
-        $permissions = Permission::whereIn('name', $viewerPermissions)->get();
-        $viewer->syncPermissions($permissions);
+        $viewerApiPermissions = Permission::where('guard_name', 'api')
+            ->whereIn('name', ['view_competitions', 'view_teams', 'view_players'])
+            ->get();
+        $viewerApi->syncPermissions($viewerApiPermissions);
     }
 }
