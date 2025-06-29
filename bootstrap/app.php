@@ -11,27 +11,21 @@ use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
+    ->withProviders([
+        App\Providers\ExceptionServiceProvider::class, // Registrar nuestro Handler personalizado
+    ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'custom.api.auth' => \App\Http\Middleware\CustomApiAuth::class,
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (UnauthorizedException $e, $request) {
-            if ($request->expectsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'message' => 'You do not have permission to access this resource.',
-                    'error' => 'Forbidden',
-                    'required_roles' => $e->getRequiredRoles() ?? []
-                ], Response::HTTP_FORBIDDEN);
-            }
-        });
+        //
     })->create();
