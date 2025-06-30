@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Laravel\Passport\Token;
 
 class AuthController extends Controller
@@ -36,8 +37,10 @@ class AuthController extends Controller
                 ]
             ], Response::HTTP_CREATED);
         } catch (\Exception $e) {
+            Log::error('Registration error: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Invalid credentials'
+                'message' => 'Invalid credentials',
+                'error' => $e->getMessage()
             ], Response::HTTP_UNAUTHORIZED);
         }
     }
