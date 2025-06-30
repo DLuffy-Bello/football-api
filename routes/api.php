@@ -19,8 +19,3 @@ Route::prefix('teams')->group(function () {
     Route::get('', [\App\Http\Controllers\TeamController::class, 'getTeams']);
     Route::get('/{id}', [\App\Http\Controllers\TeamController::class, 'getTeam']);
 });
-
-Route::prefix('players')->group(function () {
-    Route::get('', [\App\Http\Controllers\PlayerController::class, 'getPlayers']);
-    Route::get('/{id}', [\App\Http\Controllers\PlayerController::class, 'getPlayer']);
-});

@@ -50,20 +50,4 @@ interface IFootballDataService
      * @return array
      */
     public function getTeamDetails(int $teamId): array;
-
-    /**
-     * Get a list of players.
-     *
-     * @return array
-     */
-    public function getPlayers(): array;
-
-    /**
-     * Get details of a specific player.
-     *
-     * @param int $playerId
-     * @return array
-     */
-    public function getPlayerDetails(int $playerId): array;
-
 }
